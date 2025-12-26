@@ -5,21 +5,34 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
-PREFIX = os.getenv("PREFIX", "$")
+PREFIX = "$"
 
 intents = discord.Intents.all()
-
 bot = commands.Bot(command_prefix=PREFIX, intents=intents, help_command=None)
 
-# Carga automática de cogs
-@bot.event
-async def setup_hook():
+# --- Carga de Cogs ---
+async def load_cogs():
     await bot.load_extension("cogs.moderation")
-    print(">> Cog de moderación cargado.")
+    await bot.load_extension("cogs.server_tools")
 
-# Evento ready
 @bot.event
 async def on_ready():
-    print(f">> Bot online: {bot.user} | ID: {bot.user.id}")
+    print(f">> Bot online: {bot.user}")
 
-bot.run(TOKEN)
+@bot.command(name="help")
+async def help_command(ctx):
+    msg = (
+        "**Prefijo:** `$`\n"
+        "**Slash:** `/`\n\n"
+        "**Comandos disponibles en Moderation y Server Tools.**"
+    )
+    await ctx.send(msg)
+
+# --- Main ---
+async def main():
+    async with bot:
+        await load_cogs()
+        await bot.start(TOKEN)
+
+import asyncio
+asyncio.run(main())
